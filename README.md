@@ -43,4 +43,4 @@ This data was pulled in October 2024 and took the author 150 hours to pull.
 
 ### `categories.csv`
 - Information about Steam categories each game belongs to.
-- Examples: "Single-player", "Full controller support", etc.
+- Examples: "Single-player", "Full controller support", etc.# Hectors-steam-repo
