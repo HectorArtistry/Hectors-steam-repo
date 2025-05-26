@@ -1,4 +1,4 @@
-My Steam Repo/
+Hectors Steam Repo/
 ├── .venv/ # Virtual environment
 
 ├── config/
