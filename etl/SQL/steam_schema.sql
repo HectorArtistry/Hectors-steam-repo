@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS games;
 DROP TABLE IF EXISTS genres;
 DROP TABLE IF EXISTS promotional;
 DROP TABLE IF EXISTS reviews;
-DROP TABLE IF EXISTS steamspy
+DROP TABLE IF EXISTS steam_spy;
 DROP TABLE IF EXISTS tags;
 
 -- Core table: games
@@ -22,7 +22,7 @@ CREATE TABLE games (
     is_free BOOLEAN, -- This boolean is technically unnecessary.
     -- last_updated_price TEXT, -- This is redundant with the 'steamspy' table
     -- languages TEXT, -- This is redundant with the 'steamspy' table
-    release_type TEXT, -- This is to define weather the games are a 'demo' or 'game'. 
+    release_type TEXT -- This is to define weather the games are a 'demo' or 'game'. 
 );
 
 -- Categories table
@@ -74,7 +74,7 @@ CREATE TABLE reviews (
     positive_likes INTEGER,
     negative_dislikes INTEGER,
     total_reviews INTEGER,
-    recommendations INTEGER
+    recommendations INTEGER,
     FOREIGN KEY (appid) REFERENCES games(appid)
 );
 
@@ -82,7 +82,7 @@ CREATE TABLE reviews (
 -- Stores additional game data from Steamspy
 -- This table is clear and concise,
 -- and is superior to the genres table.
-CREATE TABLE steamspy (
+CREATE TABLE steam_spy (
     appid INTEGER,
     developer TEXT,
     publisher TEXT,
