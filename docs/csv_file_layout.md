@@ -12,5 +12,5 @@
 | `tags`             | `appid`, `tag` |
 
 # Note #
-- The "game" table has a lists in several of its columns.
+- The "game" table has a sets in several of its columns.
 -  

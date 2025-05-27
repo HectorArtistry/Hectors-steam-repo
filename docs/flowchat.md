@@ -8,8 +8,8 @@ Hectors Steam Repo/
 ├── data/
 │ ├── api_pulled_data/ # To be left empty
 │ ├── processed/
-│ └── raw/ # Raw CSVs are here
-
+│ ├── raw/ # Raw CSVs are here
+│ └── steam_data.db
 ├── docs/
 │ └── flowchart/
 

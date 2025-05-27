@@ -88,9 +88,23 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                     continue
         df = pd.DataFrame(cleaned_rows, columns=["app_id", "game_summary"])
     else:
-        df = pd.read_csv(csv_path)  # For other tables, just read the CSV normally
-        if limit is not None:
-            df = df.head(limit)  # Limit to the first N rows if specified
+        import csv
+        cleaned_rows = []
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row if it's short
+                    row = row + [""] * (len(header) - len(row))
+                    # Pick first from set for each field
+                    cleaned_row = [pick_first_from_set(val) for val in row[:len(header)]]
+                    cleaned_rows.append(cleaned_row)
+                    if limit and len(cleaned_rows) >= limit:
+                        break
+                except Exception:
+                    continue
+        df = pd.DataFrame(cleaned_rows, columns=header)
     df.to_sql(table_name, conn, if_exists="replace", index=False)  # Write DataFrame to SQLite table
     
 def load_all_tables():
@@ -120,7 +134,7 @@ def load_all_tables():
         # Load each CSV file into the corresponding table
         for table, path in data_files.items():
             if os.path.exists(path):
-                load_csv_to_sqlite(path, table, conn, limit=1000)
+                load_csv_to_sqlite(path, table, conn, limit=10000)
                 print(f"Loaded {table} into the database")
             else:
                 print(f"Warning: {path} not found")
