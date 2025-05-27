@@ -86,6 +86,7 @@ CREATE TABLE steam_spy (
     appid INTEGER,
     developer TEXT,
     publisher TEXT,
+    owners_range TEXT,
     price INTEGER, -- superior to the games table
     languages INTEGER, -- superior to the games table
     genre TEXT, -- superior to genres table

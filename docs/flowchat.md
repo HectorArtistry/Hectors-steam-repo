@@ -10,8 +10,10 @@ Hectors Steam Repo/
 │ ├── processed/
 │ ├── raw/ # Raw CSVs are here
 │ └── steam_data.db
+
 ├── docs/
-│ └── flowchart/
+│ ├── csv_file_layout.md
+│ └── flowchart.md
 
 ├── etl/
 │ ├── extract/ # (API) data already extracted and loaded into data/raw
@@ -20,7 +22,7 @@ Hectors Steam Repo/
 │ ├── SQL/
 │ │ └── steam_schema.sql # Database SQL schema
 │ └── transform/
-│ └── transform.py # Transformation logic
+│   └── transform.py # Transformation.py is now empty, due to requirements of transformation within load.py
 
 ├── scripts/
 │ └── run_etl.py # Pipeline execution
@@ -37,12 +39,12 @@ Hectors Steam Repo/
 │ │ └── .gitkeep
 │ ├── unit_tests/
 │ │ └── test_db_config.py
-│ └── run_tests.py
+│ ├── run_tests.py
+│ └── test.py
 
 ├── utils/
 │ └── logging_utils.py
 
-├── .coveragerc
 ├── .env.dev
 ├── .env.test
 ├── .flake8

@@ -87,6 +87,74 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                 except Exception:
                     continue
         df = pd.DataFrame(cleaned_rows, columns=["app_id", "game_summary"])
+    
+    elif table_name == "reviews":
+        import csv
+        cleaned_rows = []
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row if it's short
+                    row = row + [""] * (max(9, len(header)) - len(row))
+                    # Select only the columns you want
+                    selected = [
+                        row[0],  # appid
+                        row[1],  # review_score
+                        row[2],  # review_score_text
+                        row[3],  # positive_likes
+                        row[4],  # negative_dislikes
+                        row[5],  # total_reviews
+                        row[8],  # recommendations (9th column, index 8)
+                    ]
+                    cleaned_rows.append(selected)
+                    if limit and len(cleaned_rows) >= limit:
+                        break
+                except Exception:
+                    continue
+        df = pd.DataFrame(
+            cleaned_rows,
+            columns=["appid", "review_score", "review_score_text", "positive_likes", "negative_dislikes", "total_reviews", "recommendations"],
+            )
+    
+    elif table_name == "steam_spy":
+        import csv
+        cleaned_rows = []
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row if it's short
+                    row = row + [""] * (14 - len(row))
+                    selected = [
+                        row[0],  # app_id
+                        row[1],  # developer
+                        row[2],  # publisher
+                        row[3],  # owners_range
+                        row[9],  # price
+                        row[12], # languages
+                        row[13], # genres
+                    ]
+                    cleaned_rows.append(selected)
+                    if limit and len(cleaned_rows) >= limit:
+                        break
+                except Exception:
+                    continue
+        df = pd.DataFrame(
+            cleaned_rows,
+            columns=[
+                "appid",
+                "developer",
+                "publisher",
+                "owners_range",
+                "price",
+                "languages",
+                "genre"
+            ],
+        )
+    
     else:
         import csv
         cleaned_rows = []
