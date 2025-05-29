@@ -18,7 +18,7 @@ def preview_db(db_path="data/steam_data.db"):
     for table in tables:
         print(f"\nPreview of '{table}':")
         try:
-            cursor.execute(f"SELECT * FROM {table} LIMIT 20;")
+            cursor.execute(f"SELECT * FROM {table} LIMIT 20;") # Limit to 20 rows for preview
             rows = cursor.fetchall()
             # Print column names
             col_names = [description[0] for description in cursor.description]

@@ -112,9 +112,10 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                         break
                 except Exception:
                     continue
-        df = pd.DataFrame(cleaned_rows, columns=["app_id", "game_summary"])
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "game_summary"])
     
-    
+    #  elif table_name == "genres":
+    # Note: Excluded to force the else functionality.
     
     elif table_name == "promotional":
         import csv
@@ -132,8 +133,6 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                 except Exception:
                     continue
         df = pd.DataFrame(cleaned_rows, columns=["appid", "head_image", "background_image"])
-    
-    # elif table_name == "genres": Note: Excluded to force the else functionality.
  
     elif table_name == "promotional":
         import csv
@@ -292,7 +291,7 @@ def load_all_tables():
         # Load each CSV file into the corresponding table
         for table, path in data_files.items():
             if os.path.exists(path):
-                load_csv_to_sqlite(path, table, conn, limit=10000)
+                load_csv_to_sqlite(path, table, conn, limit=50000)
                 print(f"Loaded {table} into the database")
             else:
                 print(f"Warning: {path} not found")
