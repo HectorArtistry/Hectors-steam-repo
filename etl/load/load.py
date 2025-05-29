@@ -60,8 +60,34 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                         break  # Stop if we've reached the limit
                 except Exception:
                     continue  # Skip any row that causes an error
-        df = pd.DataFrame(cleaned_rows, columns=["app_id", "title", "release_date", "is_free", "type"])  # Create DataFrame
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "title", "release_date", "is_free", "release_type"])  # Create DataFrame
     
+    elif table_name == "categories":
+        import csv
+        from collections import defaultdict
+        appid_to_categories = defaultdict(list)
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row if it's short
+                    row = row + [""] * (len(header) - len(row))
+                    appid = row[0]
+                    category = row[1]
+                    if appid and category:
+                        appid_to_categories[appid].append(category)
+                except Exception:
+                    continue
+        # Apply limit to distinct appids
+        cleaned_rows = []
+        for i, (appid, categories) in enumerate(appid_to_categories.items()):
+            if limit and i >= limit:
+                break
+            combined_categories = ", ".join(categories)
+            cleaned_rows.append([appid, combined_categories])
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "category"])
+   
     elif table_name == "descriptions":
         import csv
         cleaned_rows = []
@@ -88,6 +114,44 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                     continue
         df = pd.DataFrame(cleaned_rows, columns=["app_id", "game_summary"])
     
+    
+    
+    elif table_name == "promotional":
+        import csv
+        cleaned_rows = []
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row to at least 3 columns
+                    row = row + [""] * (3 - len(row))
+                    cleaned_rows.append(row[:3])
+                    if limit and len(cleaned_rows) >= limit:
+                        break
+                except Exception:
+                    continue
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "head_image", "background_image"])
+    
+    # elif table_name == "genres": Note: Excluded to force the else functionality.
+ 
+    elif table_name == "promotional":
+        import csv
+        cleaned_rows = []
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row to at least 3 columns
+                    row = row + [""] * (3 - len(row))
+                    cleaned_rows.append(row[:3])
+                    if limit and len(cleaned_rows) >= limit:
+                        break
+                except Exception:
+                    continue
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "head_image", "background_image"])
+        
     elif table_name == "reviews":
         import csv
         cleaned_rows = []
@@ -154,7 +218,33 @@ def load_csv_to_sqlite(csv_path, table_name, conn, limit=None):
                 "genre"
             ],
         )
-    
+        
+    elif table_name == "tags":
+        import csv
+        from collections import defaultdict
+        appid_to_tags = defaultdict(list)
+        with open(csv_path, encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)
+            for row in reader:
+                try:
+                    # Pad row if it's short
+                    row = row + [""] * (len(header) - len(row))
+                    appid = row[0]
+                    tag = row[1]
+                    if appid and tag:
+                        appid_to_tags[appid].append(tag)
+                except Exception:
+                    continue
+        # Apply limit to distinct appids
+        cleaned_rows = []
+        for i, (appid, tags) in enumerate(appid_to_tags.items()):
+            if limit and i >= limit:
+                break
+            combined_tags = ", ".join(tags)
+            cleaned_rows.append([appid, combined_tags])
+        df = pd.DataFrame(cleaned_rows, columns=["appid", "tag"])
+            
     else:
         import csv
         cleaned_rows = []

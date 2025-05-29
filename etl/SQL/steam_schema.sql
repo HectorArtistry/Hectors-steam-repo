@@ -57,10 +57,11 @@ CREATE TABLE genres (
 
 CREATE TABLE promotional (
     appid INTEGER,
-    Head_image TEXT,
+    head_image TEXT,
     background_image TEXT,
-    screenshot_1 TEXT,
-    trailer TEXT,
+    -- screenshot TEXT, -- These are not necessary, and I could consistently extract them.
+    -- trailer TEXT, -- These are not necessary, and I could consistently extract them.
+    -- "https://assets.gcore.pro/blog_containerizing_prod/uploads/2023/09/error-404-how-to-fix-it-fi.png"
     FOREIGN KEY (appid) REFERENCES games(appid)
 );
 
