@@ -59,6 +59,7 @@ def main():
     st.header(f"Preview of `{table}` table")
     preview_df = get_table_preview(conn, table)
     st.dataframe(preview_df)
+    
     # 1. Line chart: Tag usage percentage vs. releases per month
     st.header("Tag Usage Over Time")
     tags_df = get_tags_df(conn)
@@ -144,7 +145,7 @@ def main():
                     <p><b>Review Score:</b> {row.get('review_score_text', 'N/A')}</p>
                     <p><b>Developer:</b> {row.get('developer', 'N/A')}</p>
                     <p><b>Publisher:</b> {row.get('publisher', 'N/A')}</p>
-                    <p><b>Price:</b> {row.get('price', 'N/A')}</p>
+                    <p><b>Price:</b> £{(int(row['price'])/100):.2f}</p>
                     <p><b>Languages:</b> {row.get('languages', 'N/A')}</p>
                     <p><b>Genre:</b> {row.get('genre', 'N/A')}</p>
                 </div>
@@ -163,11 +164,70 @@ def main():
             st.write(f"**Languages:** {row.get('languages', 'N/A')}")
             st.write(f"**Genre:** {row.get('genre', 'N/A')}")
     # 5. Order games by any column
+    games_df['appid'] = pd.to_numeric(games_df['appid'], errors='coerce')
+    tags_df['appid'] = pd.to_numeric(tags_df['appid'], errors='coerce')
     st.header("Order Games By Any Column")
     order_col = st.selectbox("Select column to order by", games_df.columns)
     order_dir = st.radio("Order direction", ["Ascending", "Descending"])
     ordered_games = games_df.sort_values(order_col, ascending=(order_dir == "Ascending"))
     st.dataframe(ordered_games)
+
+        # 6. Developer/Publisher Output
+    st.header("Developer/Publisher Output")
+
+    dev_pub_option = st.radio("Group by", ["Developer", "Publisher"])
+    group_col = "developer" if dev_pub_option == "Developer" else "publisher"
+
+    # Join games and steam_spy to get developer/publisher for all games
+    dev_pub_df = pd.read_sql_query(
+        f"""
+        SELECT g.appid, s.{group_col}, r.review_score, r.review_score_text
+        FROM games g
+        LEFT JOIN steam_spy s ON g.appid = s.appid
+        LEFT JOIN reviews r ON g.appid = r.appid
+        """, conn
+    )
+
+    dev_pub_df = dev_pub_df[
+    dev_pub_df[group_col].notnull() &
+    (dev_pub_df[group_col] != '') &
+    (dev_pub_df[group_col] != '\\N')
+    ]
+
+    # Count games per developer/publisher
+    count_df = dev_pub_df.groupby(group_col)['appid'].count().reset_index(name='Game Count')
+
+    # Average review score (if numeric) or proportion of positive reviews (if text)
+    if 'review_score' in dev_pub_df.columns and pd.api.types.is_numeric_dtype(dev_pub_df['review_score']):
+        avg_score = dev_pub_df.groupby(group_col)['review_score'].mean().reset_index(name='Avg Review Score')
+        merged_df = pd.merge(count_df, avg_score, on=group_col)
+    elif 'review_score_text' in dev_pub_df.columns:
+        dev_pub_df['is_positive'] = dev_pub_df['review_score_text'].isin(['Very Positive', 'Overwhelmingly Positive'])
+        avg_score = dev_pub_df.groupby(group_col)['is_positive'].mean().reset_index(name='% Positive Reviews')
+        merged_df = pd.merge(count_df, avg_score, on=group_col)
+    else:
+        merged_df = count_df.copy()
+        merged_df['Avg Review Score'] = None
+
+    # Show top 20 by game count
+    merged_df = merged_df.sort_values('Game Count', ascending=False).head(20)
+
+    import altair as alt
+    if 'Avg Review Score' in merged_df.columns:
+        color_col = 'Avg Review Score'
+    elif '% Positive Reviews' in merged_df.columns:
+        color_col = '% Positive Reviews'
+    else:
+        color_col = None
+
+    chart = alt.Chart(merged_df).mark_bar().encode(
+        x=alt.X('Game Count:Q', title='Number of Games'),
+        y=alt.Y(f'{group_col}:N', sort='-x', title=dev_pub_option),
+        color=alt.Color(f'{color_col}:Q', scale=alt.Scale(scheme='blues'), legend=alt.Legend(title=color_col)) if color_col else alt.value('steelblue'),
+        tooltip=[group_col, 'Game Count', color_col] if color_col else [group_col, 'Game Count']
+    ).properties(width=700, height=500)
+
+    st.altair_chart(chart, use_container_width=True)
 
     conn.close()
 
